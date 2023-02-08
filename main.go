@@ -6,7 +6,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/paul-lestyo/belajar-golang-restful-api/app"
 	"github.com/paul-lestyo/belajar-golang-restful-api/controller"
+	"github.com/paul-lestyo/belajar-golang-restful-api/exception"
 	"github.com/paul-lestyo/belajar-golang-restful-api/helper"
+	"github.com/paul-lestyo/belajar-golang-restful-api/middleware"
 	"github.com/paul-lestyo/belajar-golang-restful-api/repository"
 	"github.com/paul-lestyo/belajar-golang-restful-api/service"
 	"net/http"
@@ -23,13 +25,15 @@ func main() {
 
 	router.GET("/api/categories", categoryController.FindAll)
 	router.GET("/api/categories/:categoryId", categoryController.FindById)
-	router.POST("/api/categories/:categoryId", categoryController.Create)
+	router.POST("/api/categories", categoryController.Create)
 	router.PUT("/api/categories/:categoryId", categoryController.Update)
 	router.DELETE("/api/categories/:categoryId", categoryController.Delete)
 
+	router.PanicHandler = exception.ErrorHandler
+
 	server := http.Server{
 		Addr:    "localhost:3000",
-		Handler: router,
+		Handler: middleware.NewAuthMiddleware(router),
 	}
 
 	err := server.ListenAndServe()
